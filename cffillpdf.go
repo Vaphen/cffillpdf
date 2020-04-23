@@ -14,7 +14,7 @@ import (
 )
 
 // Fill inserts all provided values in their corresponding field in the provided pdf file
-func Fill(values map[string]string, file *os.File) (filledFile *bytes.Buffer, err error) {
+func Fill(values map[string]string, file []byte) (filledFile *bytes.Buffer, err error) {
 	libraryPath, ok := getLibraryPath()
 
 	if !ok {
@@ -31,9 +31,18 @@ func Fill(values map[string]string, file *os.File) (filledFile *bytes.Buffer, er
 	}
 	defer os.Remove(fdfFile.Name())
 
+	inputFile, err := createTemporaryWritableFile("cffillpdf-input-*.pdf")
+	if err != nil {
+		return
+	}
+	defer os.Remove(inputFile.Name())
+
+	byteReader := bytes.NewReader(file)
+	io.Copy(inputFile, byteReader)
+
 	outputFilePath := "/tmp/filledFile.pdf"
 	args := []string{
-		file.Name(),
+		inputFile.Name(),
 		"fill_form", fdfFile.Name(),
 		"output", outputFilePath,
 		"flatten",
@@ -109,7 +118,7 @@ func createFDFFile(values map[string]string) (tmpFile *os.File, err error) {
 		return
 	}
 
-	tmpFile, err = createTemporaryWritableFile("gcf-pdftk-*.fdf")
+	tmpFile, err = createTemporaryWritableFile("cfpdftk-*.fdf")
 	if err != nil {
 		return
 	}
