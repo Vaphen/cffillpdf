@@ -15,8 +15,7 @@ import (
 func main() {
   // Create the form values.
   values := map[string]string{
-    "field_1": "Hello",
-    "field_2": "World",
+    "testfield": "Hello World!",
   }
 
   // pdf should contain the input file
